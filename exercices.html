@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Module - Accueil</title>
+    <title>Math Module - Exercices</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 
     <header>
-        <h1>Bienvenue sur MathModule</h1>
+        <h1>Math Module : Exercices</h1>
         <nav>
             <ul>
                 <li><a href="index.html">Accueil</a></li>
-                <li><a href="theorie.html">Théorie</a></li>
+                <li><a href="#">Théorie</a></li>
                 <li><a href="exercices.html">Exercices</a></li>
                 <li><a href="videos.html">Vidéos</a></li>
             </ul>
@@ -22,8 +24,23 @@
 
     <main>
         <section class="content">
-            <h2>À propos de MathModule</h2>
-            <p>MathModule te permettra d'améliorer ton niveau en mathématiques.</p>
+            <h2>Algèbre</h2>
+            <div class="pdf-container">
+                <div class="pdf-card">
+                    <h3>Liste 1 : Nombres et opérations</h3>
+                    <a href="pdfs/liste1.pdf" class="btn-download" download>Télécharger (PDF)</a>
+                </div>
+                <div class="pdf-card">
+                    <h3>Liste 2 : Produits remarquables</h3>
+                    <a href="pdfs/liste2.pdf" class="btn-download" download>Télécharger (PDF)</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="exercises">
+            <h2>Module de Calcul</h2>
+            <p>Résoudre : \( 2x + 5 = 15 \)</p>
+            <p> \[ x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \] </p>
         </section>
     </main>
 
