@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Module - Modules</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    /* --- Choix du module --- */
+    .module-chooser {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(170px, 1fr));
+      gap: 14px;
+      margin: 18px 0 8px;
+      align-items: stretch;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .module-chooser { grid-template-columns: repeat(2, minmax(170px, 1fr)); }
+    }
+    @media (max-width: 420px) {
+      .module-chooser { grid-template-columns: 1fr; }
+    }
+
+    .module-btn {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+
+      width: 100%;
+      min-height: 74px;
+      padding: 14px 14px;
+
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.18);
+      background: #fff;
+
+      cursor: pointer;
+      text-align: left;
+
+      transition: transform .08s ease, box-shadow .15s ease, border-color .15s ease;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      outline: none;
+    }
+
+    .module-btn .title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      line-height: 1.1;
+    }
+
+    .module-btn .subtitle {
+      font-size: 0.9rem;
+      opacity: 0.75;
+      line-height: 1.2;
+    }
+
+    .module-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.10);
+      border-color: rgba(0,0,0,0.35);
+    }
+
+    .module-btn:active {
+      transform: translateY(0px);
+    }
+
+    /* Bouton actif */
+    .module-btn.active {
+      border-color: rgba(0,0,0,0.75);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.14);
+    }
+
+    /* Focus clavier */
+    .module-btn:focus-visible {
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.18), 0 12px 30px rgba(0,0,0,0.14);
+    }
+
+    /* Contenus cachés/visibles */
+    .module-content { display: none; margin-top: 10px; }
+    .module-content.active { display: block; }
+
+    /* Petit hint */
+    #module-hint {
+      margin-top: 6px;
+      opacity: 0.75;
+    }
+
+    /* --- Sous-modules (liste) --- */
+    .submodule-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 14px;
+      margin-top: 10px;
+
+      /* IMPORTANT pour l’affichage “en overlay” :
+         on autorise l’overflow visible pour que le panneau puisse passer au-dessus
+         (sinon certains conteneurs coupent le panneau). */
+      overflow: visible;
+    }
+    @media (max-width: 900px) {
+      .submodule-list { grid-template-columns: 1fr; }
+    }
+
+    /* --- Carte du sous-module --- */
+    details.submodule {
+      position: relative; /* ancre le panneau en overlay */
+      border: 1px solid rgba(0,0,0,0.18);
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      padding: 10px 12px;
+
+      /* Pour éviter toute “sauterie” visuelle */
+      min-height: 66px;
+    }
+
+    details.submodule > summary {
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: 800;
+      padding: 8px 6px;
+      user-select: none;
+    }
+    details.submodule > summary::-webkit-details-marker { display: none; }
+
+    .submodule-title {
+      font-size: 1.02rem;
+      line-height: 1.2;
+    }
+    .submodule-meta {
+      font-size: 0.9rem;
+      opacity: 0.75;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* --- Panneau “dropdown” en overlay (ne change pas la hauteur des cartes) --- */
+    .pdf-links {
+      position: absolute;
+      top: calc(100% + 8px); /* juste sous la carte */
+      left: 0;
+      width: 100%;
+      z-index: 999; /* passe devant les autres cartes */
+
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.18);
+      border-radius: 14px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+
+      padding: 12px 12px;
+      display: none; /* caché par défaut */
+    }
+
+    /* On affiche le panneau quand le details est ouvert */
+    details.submodule[open] .pdf-links {
+      display: grid;
+      gap: 10px;
+    }
+
+    /* Ligne de lien */
+    .pdf-link-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .pdf-link-row .label {
+      font-weight: 650;
+    }
+
+    /* Petit bouton lien PDF, cohérent avec ton style */
+    .btn-pdf {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.18);
+      background: #fff;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      transition: transform .08s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .btn-pdf:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.10);
+      border-color: rgba(0,0,0,0.35);
+    }
+
+    /* Un petit “effet d’état” quand le sous-module est ouvert */
+    details.submodule[open] {
+      border-color: rgba(0,0,0,0.55);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    }
+
+    /* Pour que le panneau overlay ne soit pas coupé si un parent a overflow hidden */
+    .content, main, body { overflow: visible; }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>MathModule : Modules</h1>
+  <nav>
+    <ul>
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="Modules.html">Modules</a></li>
+      <li><a href="Fascicules.html">Fascicules</a></li>
+      <li><a href="Videos.html">Vidéos</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+
+  <!-- Choix du module -->
+  <section class="content">
+    <div class="module-chooser" role="tablist" aria-label="Choix de la matière">
+      <button class="module-btn" data-target="alg" type="button" role="tab" aria-controls="alg" aria-selected="false">
+        <span class="title">Algèbre</span>
+        <span class="subtitle">Exercices & PDF</span>
+      </button>
+
+      <button class="module-btn" data-target="geo" type="button" role="tab" aria-controls="geo" aria-selected="false">
+        <span class="title">Géométrie</span>
+        <span class="subtitle">Exercices & PDF</span>
+      </button>
+
+      <button class="module-btn" data-target="tri" type="button" role="tab" aria-controls="tri" aria-selected="false">
+        <span class="title">Trigonométrie</span>
+        <span class="subtitle">Exercices & PDF</span>
+      </button>
+
+      <button class="module-btn" data-target="ana" type="button" role="tab" aria-controls="ana" aria-selected="false">
+        <span class="title">Analyse</span>
+        <span class="subtitle">Exercices & PDF</span>
+      </button>
+    </div>
+
+    <p id="module-hint">Clique sur une matière pour afficher le contenu.</p>
+  </section>
+
+  <!-- ALGÈBRE (avec sous-modules cliquables en overlay) -->
+  <section class="module-content" id="alg" role="tabpanel" aria-labelledby="alg-tab">
+    <section class="content">
+      <h2>Algèbre</h2>
+      <p id="alg-hint" style="opacity:.75; margin-top:-6px;">
+        Clique sur un module pour afficher ses PDFs (le panneau apparaît par-dessus, sans agrandir les cases).
+      </p>
+
+      <div class="submodule-list">
+
+        <!-- 1) Nombres et opérations -->
+        <details class="submodule">
+          <summary>
+            <span class="submodule-title">1) Nombres et opérations</span>
+            <span class="submodule-meta">PDFs ▾</span>
+          </summary>
+
+          <div class="pdf-links" role="dialog" aria-label="PDFs - Nombres et opérations">
+            <div class="pdf-link-row">
+              <span class="label">Cours</span>
+              <a class="btn-pdf" href="pdfs/MM_ALG_VA_CI1.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices</span>
+              <a class="btn-pdf" href="pdfs/MM_ALG_VA_CI1_EXOS.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Corrigé</span>
+              <a class="btn-pdf" href="pdfs/MM_ALG_VA_CI1_CORRIGE.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+          </div>
+        </details>
+
+        <!-- 2) PE(MD)(AS) -->
+        <details class="submodule">
+          <summary>
+            <span class="submodule-title">2) PE(MD)(AS)</span>
+            <span class="submodule-meta">PDFs ▾</span>
+          </summary>
+
+          <div class="pdf-links" role="dialog" aria-label="PDFs - PEMDAS">
+            <div class="pdf-link-row">
+              <span class="label">Cours</span>
+              <a class="btn-pdf" href="pdfs/alg/pemdas-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices</span>
+              <a class="btn-pdf" href="pdfs/alg/pemdas-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Corrigé</span>
+              <a class="btn-pdf" href="pdfs/alg/pemdas-corrige.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+          </div>
+        </details>
+
+        <!-- 3) Puissances entières -->
+        <details class="submodule">
+          <summary>
+            <span class="submodule-title">3) Puissances entières</span>
+            <span class="submodule-meta">PDFs ▾</span>
+          </summary>
+
+          <div class="pdf-links" role="dialog" aria-label="PDFs - Puissances">
+            <div class="pdf-link-row">
+              <span class="label">Cours</span>
+              <a class="btn-pdf" href="pdfs/alg/puissances-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices</span>
+              <a class="btn-pdf" href="pdfs/alg/puissances-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+          </div>
+        </details>
+
+        <!-- 4) Calcul littéral-->
+        <details class="submodule">
+          <summary>
+            <span class="submodule-title">4) Calcul littéral </span>
+            <span class="submodule-meta">PDFs ▾</span>
+          </summary>
+
+          <div class="pdf-links" role="dialog" aria-label="PDFs - Calcul littéral">
+            <div class="pdf-link-row">
+              <span class="label">Cours</span>
+              <a class="btn-pdf" href="pdfs/alg/calcul-litteral-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices</span>
+              <a class="btn-pdf" href="pdfs/alg/calcul-litteral-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Corrigé</span>
+              <a class="btn-pdf" href="pdfs/alg/calcul-litteral-corrige.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+          </div>
+        </details>
+
+        <!-- 5) Polynômes -->
+        <details class="submodule">
+          <summary>
+            <span class="submodule-title">5) Polynômes</span>
+            <span class="submodule-meta">PDFs ▾</span>
+          </summary>
+
+          <div class="pdf-links" role="dialog" aria-label="PDFs - Polynômes">
+            <div class="pdf-link-row">
+              <span class="label">Cours</span>
+              <a class="btn-pdf" href="pdfs/alg/polynomes-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices</span>
+              <a class="btn-pdf" href="pdfs/alg/polynomes-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Corrigé</span>
+              <a class="btn-pdf" href="pdfs/alg/polynomes-corrige.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+          </div>
+        </details>
+
+        <!-- 6) Produits remarquables -->
+        <details class="submodule">
+          <summary>
+            <span class="submodule-title">6) Produits remarquables</span>
+            <span class="submodule-meta">PDFs ▾</span>
+          </summary>
+
+          <div class="pdf-links" role="dialog" aria-label="PDFs - Produits remarquables">
+            <div class="pdf-link-row">
+              <span class="label">Cours</span>
+              <a class="btn-pdf" href="pdfs/alg/produits-remarquables-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices</span>
+              <a class="btn-pdf" href="pdfs/alg/produits-remarquables-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+          </div>
+        </details>
+
+        <!-- 7) Racines -->
+        <details class="submodule">
+          <summary>
+            <span class="submodule-title">7) Racines</span>
+            <span class="submodule-meta">PDFs ▾</span>
+          </summary>
+
+          <div class="pdf-links" role="dialog" aria-label="PDFs - Racines">
+            <div class="pdf-link-row">
+              <span class="label">Cours</span>
+              <a class="btn-pdf" href="pdfs/alg/racines-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices</span>
+              <a class="btn-pdf" href="pdfs/alg/racines-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+          </div>
+        </details>
+
+        
+
+        <!-- 8) Équations -->
+        <details class="submodule">
+          <summary>
+            <span class="submodule-title">8) Équations</span>
+            <span class="submodule-meta">PDFs ▾</span>
+          </summary>
+
+          <div class="pdf-links" role="dialog" aria-label="PDFs - Équations">
+            <div class="pdf-link-row">
+              <span class="label">Cours</span>
+              <a class="btn-pdf" href="pdfs/alg/equations-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices</span>
+              <a class="btn-pdf" href="pdfs/alg/equations-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Corrigé</span>
+              <a class="btn-pdf" href="pdfs/alg/equations-corrige.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+          </div>
+        </details>
+
+        <!-- 9) Inéquations -->
+        <details class="submodule">
+          <summary>
+            <span class="submodule-title">9) Inéquations</span>
+            <span class="submodule-meta">PDFs ▾</span>
+          </summary>
+
+          <div class="pdf-links" role="dialog" aria-label="PDFs - Inéquations">
+            <div class="pdf-link-row">
+              <span class="label">Cours</span>
+              <a class="btn-pdf" href="pdfs/alg/inequations-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices</span>
+              <a class="btn-pdf" href="pdfs/alg/inequations-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+          </div>
+        </details>
+
+        <!-- 10) Valeurs absolues -->
+        <details class="submodule">
+          <summary>
+            <span class="submodule-title">10) Valeurs absolues</span>
+            <span class="submodule-meta">PDFs ▾</span>
+          </summary>
+
+          <div class="pdf-links" role="dialog" aria-label="PDFs - Valeurs absolues">
+            <div class="pdf-link-row">
+              <span class="label">Théorie I</span>
+              <a class="btn-pdf" href="Valeur absolue/MM_ALG_VA_theorie_1.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices I</span>
+              <a class="btn-pdf" href="Valeur absolue/MM_ALG_VA_exercices_1.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie II</span>
+              <a class="btn-pdf" href="Valeur absolue/MM_ALG_VA_theorie_2.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices II</span>
+              <a class="btn-pdf" href="Valeur absolue/MM_ALG_VA_exercices_2.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie III</span>
+              <a class="btn-pdf" href="Valeur absolue/MM_ALG_VA_theorie_3.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices III</span>
+              <a class="btn-pdf" href="Valeur absolue/MM_ALG_VA_exercices_3.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+          </div>
+        </details>
+
+      </div>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercices (exemples)</h2>
+      <p>Résoudre : \( 2x + 5 = 15 \)</p>
+      <p>\[ x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \]</p>
+    </section>
+  </section>
+
+  <!-- GÉOMÉTRIE -->
+  <section class="module-content" id="geo" role="tabpanel">
+    <h2>Géométrie</h2>
+    <p>Contenu à venir…</p>
+  </section>
+
+  <!-- TRIGONOMÉTRIE -->
+  <section class="module-content" id="tri" role="tabpanel">
+    <h2>Trigonométrie</h2>
+    <p>Contenu à venir…</p>
+  </section>
+
+  <!-- ANALYSE -->
+  <section class="module-content" id="ana" role="tabpanel">
+    <h2>Analyse</h2>
+    <p>Contenu à venir…</p>
+  </section>
+
+</main>
+
+<footer>
+  <p>&copy; 2026 - Créé par Modulus et Modular</p>
+</footer>
+
+<script>
+  const buttons = document.querySelectorAll(".module-btn");
+  const sections = document.querySelectorAll(".module-content");
+  const hint = document.getElementById("module-hint");
+
+  function showModule(id) {
+    buttons.forEach(b => {
+      const isActive = (b.dataset.target === id);
+      b.classList.toggle("active", isActive);
+      b.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
+
+    sections.forEach(s => s.classList.toggle("active", s.id === id));
+
+    if (hint) hint.textContent = "";
+
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      MathJax.typesetPromise();
+    }
+  }
+
+  buttons.forEach(btn => btn.addEventListener("click", () => showModule(btn.dataset.target)));
+
+  // Accordion "strict" à l'intérieur d'Algèbre (un seul ouvert à la fois)
+  function setupSubmoduleAccordion() {
+    const submodules = document.querySelectorAll("#alg details.submodule");
+    submodules.forEach(d => {
+      d.addEventListener("toggle", () => {
+        if (d.open) submodules.forEach(other => { if (other !== d) other.open = false; });
+      });
+    });
+
+    // Fermer si clic à l'extérieur (pratique quand le panneau est en overlay)
+    document.addEventListener("click", (e) => {
+      const openOne = document.querySelector("#alg details.submodule[open]");
+      if (!openOne) return;
+      if (!openOne.contains(e.target)) openOne.open = false;
+    });
+
+    // Fermer avec Escape
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      const openOne = document.querySelector("#alg details.submodule[open]");
+      if (openOne) openOne.open = false;
+    });
+  }
+
+  setupSubmoduleAccordion();
+
+  // Rien n'apparaît au départ (comme tu le souhaites).
+  // Si tu veux Algèbre par défaut, décommente :
+  // showModule("alg");
+</script>
+
+</body>
+</html>
