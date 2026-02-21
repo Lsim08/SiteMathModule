@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Math Module - Modules</title>
+  <title>Math Module - Vidéos</title>
 
   <link rel="stylesheet" href="style.css">
 
@@ -12,7 +12,7 @@
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
   <style>
-    /* --- Choix du module (Matières) --- */
+    /* --- Choix du module --- */
     .module-chooser {
       display: grid;
       grid-template-columns: repeat(4, minmax(170px, 1fr));
@@ -21,6 +21,7 @@
       align-items: stretch;
     }
 
+    /* Responsive */
     @media (max-width: 900px) {
       .module-chooser { grid-template-columns: repeat(2, minmax(170px, 1fr)); }
     }
@@ -33,21 +34,35 @@
       flex-direction: column;
       justify-content: center;
       gap: 6px;
+
       width: 100%;
       min-height: 74px;
       padding: 14px 14px;
+
       border-radius: 14px;
       border: 1px solid rgba(0,0,0,0.18);
       background: #fff;
+
       cursor: pointer;
       text-align: left;
+
       transition: transform .08s ease, box-shadow .15s ease, border-color .15s ease;
       box-shadow: 0 6px 18px rgba(0,0,0,0.06);
       outline: none;
     }
 
-    .module-btn .title { font-size: 1.05rem; font-weight: 800; }
-    .module-btn .subtitle { font-size: 0.9rem; opacity: 0.75; }
+    .module-btn .title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      line-height: 1.1;
+    }
+
+    .module-btn .subtitle {
+      font-size: 0.9rem;
+      opacity: 0.75;
+      line-height: 1.2;
+    }
 
     .module-btn:hover {
       transform: translateY(-1px);
@@ -55,34 +70,57 @@
       border-color: rgba(0,0,0,0.35);
     }
 
+    .module-btn:active {
+      transform: translateY(0px);
+    }
+
+    /* Bouton actif */
     .module-btn.active {
       border-color: rgba(0,0,0,0.75);
       box-shadow: 0 12px 30px rgba(0,0,0,0.14);
     }
 
-    /* --- Contenus des sections --- */
+    /* Focus clavier */
+    .module-btn:focus-visible {
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.18), 0 12px 30px rgba(0,0,0,0.14);
+    }
+
+    /* Contenus cachés/visibles */
     .module-content { display: none; margin-top: 10px; }
     .module-content.active { display: block; }
 
+    /* Petit hint */
+    #module-hint {
+      margin-top: 6px;
+      opacity: 0.75;
+    }
+
+    /* --- Sous-modules (liste) --- */
     .submodule-list {
       display: grid;
       grid-template-columns: repeat(2, minmax(260px, 1fr));
       gap: 14px;
       margin-top: 10px;
+
+      /* IMPORTANT pour l’affichage “en overlay” :
+         on autorise l’overflow visible pour que le panneau puisse passer au-dessus
+         (sinon certains conteneurs coupent le panneau). */
       overflow: visible;
     }
     @media (max-width: 900px) {
       .submodule-list { grid-template-columns: 1fr; }
     }
 
-    /* --- Cartes des sous-modules --- */
+    /* --- Carte du sous-module --- */
     details.submodule {
-      position: relative;
+      position: relative; /* ancre le panneau en overlay */
       border: 1px solid rgba(0,0,0,0.18);
       border-radius: 14px;
       background: #fff;
       box-shadow: 0 6px 18px rgba(0,0,0,0.06);
       padding: 10px 12px;
+
+      /* Pour éviter toute “sauterie” visuelle */
       min-height: 66px;
     }
 
@@ -97,65 +135,80 @@
       padding: 8px 6px;
       user-select: none;
     }
+    details.submodule > summary::-webkit-details-marker { display: none; }
 
-    /* --- Panneau des liens PDF (Overlay) --- */
+    .submodule-title {
+      font-size: 1.02rem;
+      line-height: 1.2;
+    }
+    .submodule-meta {
+      font-size: 0.9rem;
+      opacity: 0.75;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* --- Panneau “dropdown” en overlay (ne change pas la hauteur des cartes) --- */
     .pdf-links {
       position: absolute;
-      top: calc(100% + 8px);
+      top: calc(100% + 8px); /* juste sous la carte */
       left: 0;
       width: 100%;
-      z-index: 999;
+      z-index: 999; /* passe devant les autres cartes */
+
       background: #fff;
       border: 1px solid rgba(0,0,0,0.18);
       border-radius: 14px;
       box-shadow: 0 16px 40px rgba(0,0,0,0.18);
-      
-      /* ESPACEMENT AJUSTÉ (AÉRÉ) */
-      padding: 16px 14px; 
-      display: none;
+
+      padding: 12px 12px;
+      display: none; /* caché par défaut */
     }
 
-    details.submodule[open] .pdf-links { 
-      display: grid; 
-      gap: 18px; /* Plus d'espace entre les lignes de PDF */
+    /* On affiche le panneau quand le details est ouvert */
+    details.submodule[open] .pdf-links {
+      display: grid;
+      gap: 10px;
     }
 
+    /* Ligne de lien */
     .pdf-link-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 4px;
+      flex-wrap: wrap;
     }
 
     .pdf-link-row .label {
       font-weight: 650;
-      font-size: 1rem;
     }
 
-    /* --- Boutons PDF --- */
+    /* Petit bouton lien PDF, cohérent avec ton style */
     .btn-pdf {
       display: inline-block;
-      /* BOUTON PLUS GRAND */
-      padding: 10px 16px; 
+      padding: 8px 12px;
       border-radius: 10px;
-      border: 1px solid #2c3e50;
+      border: 1px solid rgba(0,0,0,0.18);
       background: #fff;
       text-decoration: none;
-      color: #2c3e50;
-      font-size: 0.9rem;
-      font-weight: bold;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      transition: all 0.2s ease;
+      color: inherit;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      transition: transform .08s ease, box-shadow .15s ease, border-color .15s ease;
     }
-
     .btn-pdf:hover {
-      background: #2c3e50;
-      color: #fff;
       transform: translateY(-1px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.10);
+      border-color: rgba(0,0,0,0.35);
     }
 
+    /* Un petit “effet d’état” quand le sous-module est ouvert */
+    details.submodule[open] {
+      border-color: rgba(0,0,0,0.55);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    }
+
+    /* Pour que le panneau overlay ne soit pas coupé si un parent a overflow hidden */
     .content, main, body { overflow: visible; }
   </style>
 </head>
@@ -175,34 +228,45 @@
 </header>
 
 <main>
+
+  <!-- Choix du module -->
   <section class="content">
-    <div class="module-chooser" role="tablist">
-      <button class="module-btn" data-target="alg" type="button" role="tab">
+    <div class="module-chooser" role="tablist" aria-label="Choix de la matière">
+      <button class="module-btn" data-target="alg" type="button" role="tab" aria-controls="alg" aria-selected="false">
         <span class="title">Algèbre</span>
         <span class="subtitle">Exercices & PDF</span>
       </button>
-      <button class="module-btn" data-target="geo" type="button" role="tab">
+
+      <button class="module-btn" data-target="geo" type="button" role="tab" aria-controls="geo" aria-selected="false">
         <span class="title">Géométrie</span>
-        <span class="subtitle">Prochainement</span>
+        <span class="subtitle">Exercices & PDF</span>
       </button>
-      <button class="module-btn" data-target="tri" type="button" role="tab">
+
+      <button class="module-btn" data-target="tri" type="button" role="tab" aria-controls="tri" aria-selected="false">
         <span class="title">Trigonométrie</span>
-        <span class="subtitle">Prochainement</span>
+        <span class="subtitle">Exercices & PDF</span>
       </button>
-      <button class="module-btn" data-target="ana" type="button" role="tab">
+
+      <button class="module-btn" data-target="ana" type="button" role="tab" aria-controls="ana" aria-selected="false">
         <span class="title">Analyse</span>
-        <span class="subtitle">Prochainement</span>
+        <span class="subtitle">Exercices & PDF</span>
       </button>
     </div>
+
     <p id="module-hint">Clique sur une matière pour afficher le contenu.</p>
   </section>
 
-  <section class="module-content" id="alg" role="tabpanel">
+  <!-- ALGÈBRE (avec sous-modules cliquables en overlay) -->
+  <section class="module-content" id="alg" role="tabpanel" aria-labelledby="alg-tab">
     <section class="content">
       <h2>Algèbre</h2>
+      <p id="alg-hint" style="opacity:.75; margin-top:-6px;">
+        Clique sur un module pour afficher ses PDFs (le panneau apparaît par-dessus, sans agrandir les cases).
+      </p>
+
       <div class="submodule-list">
 
-         <!-- 1) Nombres et opérations -->
+        <!-- 1) Nombres et opérations -->
         <details class="submodule">
           <summary>
             <span class="submodule-title">1) Nombres et opérations</span>
@@ -211,16 +275,28 @@
 
           <div class="pdf-links" role="dialog" aria-label="PDFs - Nombres et opérations">
             <div class="pdf-link-row">
-              <span class="label">Cours</span>
-              <a class="btn-pdf" href="pdfs/MM_ALG_VA_CI1.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Théorie I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
-              <span class="label">Exercices</span>
-              <a class="btn-pdf" href="pdfs/MM_ALG_VA_CI1_EXOS.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Exercices I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
-              <span class="label">Corrigé</span>
-              <a class="btn-pdf" href="pdfs/MM_ALG_VA_CI1_CORRIGE.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Théorie II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
           </div>
         </details>
@@ -234,16 +310,28 @@
 
           <div class="pdf-links" role="dialog" aria-label="PDFs - PEMDAS">
             <div class="pdf-link-row">
-              <span class="label">Cours</span>
-              <a class="btn-pdf" href="pdfs/alg/pemdas-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Théorie I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
-              <span class="label">Exercices</span>
-              <a class="btn-pdf" href="pdfs/alg/pemdas-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Exercices I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
-              <span class="label">Corrigé</span>
-              <a class="btn-pdf" href="pdfs/alg/pemdas-corrige.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Théorie II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
           </div>
         </details>
@@ -257,12 +345,28 @@
 
           <div class="pdf-links" role="dialog" aria-label="PDFs - Puissances">
             <div class="pdf-link-row">
-              <span class="label">Cours</span>
-              <a class="btn-pdf" href="pdfs/alg/puissances-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Théorie I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
-              <span class="label">Exercices</span>
-              <a class="btn-pdf" href="pdfs/alg/puissances-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Exercices I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
           </div>
         </details>
@@ -276,16 +380,28 @@
 
           <div class="pdf-links" role="dialog" aria-label="PDFs - Calcul littéral">
             <div class="pdf-link-row">
-              <span class="label">Cours</span>
-              <a class="btn-pdf" href="pdfs/alg/calcul-litteral-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Théorie I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
-              <span class="label">Exercices</span>
-              <a class="btn-pdf" href="pdfs/alg/calcul-litteral-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Exercices I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
-              <span class="label">Corrigé</span>
-              <a class="btn-pdf" href="pdfs/alg/calcul-litteral-corrige.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Théorie II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
           </div>
         </details>
@@ -299,16 +415,28 @@
 
           <div class="pdf-links" role="dialog" aria-label="PDFs - Polynômes">
             <div class="pdf-link-row">
-              <span class="label">Cours</span>
-              <a class="btn-pdf" href="pdfs/alg/polynomes-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Théorie I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
-              <span class="label">Exercices</span>
-              <a class="btn-pdf" href="pdfs/alg/polynomes-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Exercices I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
-              <span class="label">Corrigé</span>
-              <a class="btn-pdf" href="pdfs/alg/polynomes-corrige.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Théorie II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
           </div>
         </details>
@@ -322,12 +450,28 @@
 
           <div class="pdf-links" role="dialog" aria-label="PDFs - Produits remarquables">
             <div class="pdf-link-row">
-              <span class="label">Cours</span>
-              <a class="btn-pdf" href="pdfs/alg/produits-remarquables-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Théorie I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
-              <span class="label">Exercices</span>
-              <a class="btn-pdf" href="pdfs/alg/produits-remarquables-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Exercices I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
           </div>
         </details>
@@ -341,12 +485,28 @@
 
           <div class="pdf-links" role="dialog" aria-label="PDFs - Racines">
             <div class="pdf-link-row">
-              <span class="label">Cours</span>
-              <a class="btn-pdf" href="pdfs/alg/racines-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Théorie I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
-              <span class="label">Exercices</span>
-              <a class="btn-pdf" href="pdfs/alg/racines-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Exercices I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
           </div>
         </details>
@@ -362,16 +522,28 @@
 
           <div class="pdf-links" role="dialog" aria-label="PDFs - Équations">
             <div class="pdf-link-row">
-              <span class="label">Cours</span>
-              <a class="btn-pdf" href="pdfs/alg/equations-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Théorie I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
-              <span class="label">Exercices</span>
-              <a class="btn-pdf" href="pdfs/alg/equations-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Exercices I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
-              <span class="label">Corrigé</span>
-              <a class="btn-pdf" href="pdfs/alg/equations-corrige.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Théorie II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
           </div>
         </details>
@@ -385,58 +557,89 @@
 
           <div class="pdf-links" role="dialog" aria-label="PDFs - Inéquations">
             <div class="pdf-link-row">
-              <span class="label">Cours</span>
-              <a class="btn-pdf" href="pdfs/alg/inequations-cours.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Théorie I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
-              <span class="label">Exercices</span>
-              <a class="btn-pdf" href="pdfs/alg/inequations-exos.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+              <span class="label">Exercices I</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices II</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Théorie III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
+            </div>
+            <div class="pdf-link-row">
+              <span class="label">Exercices III</span>
+              <a class="btn-pdf" href="" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
           </div>
         </details>
 
         <!-- 10) Valeurs absolues -->
-
         <details class="submodule">
           <summary>
             <span class="submodule-title">10) Valeurs absolues</span>
             <span class="submodule-meta">PDFs ▾</span>
           </summary>
-          <div class="pdf-link-row">
+
+          <div class="pdf-links" role="dialog" aria-label="PDFs - Valeurs absolues">
+            <div class="pdf-link-row">
               <span class="label">Théorie I</span>
-              <a class="btn-pdf" href="MM_ALG_VA_theorie_1.pdf" target="_blank" rel="noopener">Ouvrir</a>
+              <a class="btn-pdf" href="Valeur absolue/MM_ALG_VA_theorie_1.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
-          <div class="pdf-link-row">
+            <div class="pdf-link-row">
               <span class="label">Exercices I</span>
-              <a class="btn-pdf" href="MM_ALG_VA_exercices_1.pdf" target="_blank"rel="noopener">Ouvrir</a>
+              <a class="btn-pdf" href="Valeur absolue/MM_ALG_VA_exercices_1.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
-          <div class="pdf-link-row">
+            <div class="pdf-link-row">
               <span class="label">Théorie II</span>
-              <a class="btn-pdf" href="MM_ALG_VA_theorie_2.pdf" target="_blank"rel="noopener">Ouvrir</a>
+              <a class="btn-pdf" href="Valeur absolue/MM_ALG_VA_theorie_2.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
-          <div class="pdf-link-row">
+            <div class="pdf-link-row">
               <span class="label">Exercices II</span>
-              <a class="btn-pdf" href="MM_ALG_VA_exercices_2.pdf" target="_blank"rel="noopener">Ouvrir</a>
+              <a class="btn-pdf" href="Valeur absolue/MM_ALG_VA_exercices_2.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
             <div class="pdf-link-row">
               <span class="label">Théorie III</span>
-              <a class="btn-pdf" href="MM_ALG_VA_theorie_3.pdf" target="_blank" rel="noopener" >Ouvrir</a>
+              <a class="btn-pdf" href="Valeur absolue/MM_ALG_VA_theorie_3.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
-          
             <div class="pdf-link-row">
               <span class="label">Exercices III</span>
-              <a class="btn-pdf" href="MM_ALG_VA_exercices_3.pdf" target="_blank" rel="noopener" >Ouvrir</a>
+              <a class="btn-pdf" href="Valeur absolue/MM_ALG_VA_exercices_3.pdf" target="_blank" rel="noopener">Ouvrir (PDF)</a>
             </div>
           </div>
         </details>
 
-        </div>
+      </div>
     </section>
   </section>
 
-  <section class="module-content" id="geo" role="tabpanel"><h2>Géométrie</h2><p>Contenu à venir...</p></section>
-  <section class="module-content" id="tri" role="tabpanel"><h2>Trigonométrie</h2><p>Contenu à venir...</p></section>
-  <section class="module-content" id="ana" role="tabpanel"><h2>Analyse</h2><p>Contenu à venir...</p></section>
+  <!-- GÉOMÉTRIE -->
+  <section class="module-content" id="geo" role="tabpanel">
+    <h2>Géométrie</h2>
+    <p>Contenu à venir…</p>
+  </section>
+
+  <!-- TRIGONOMÉTRIE -->
+  <section class="module-content" id="tri" role="tabpanel">
+    <h2>Trigonométrie</h2>
+    <p>Contenu à venir…</p>
+  </section>
+
+  <!-- ANALYSE -->
+  <section class="module-content" id="ana" role="tabpanel">
+    <h2>Analyse</h2>
+    <p>Contenu à venir…</p>
+  </section>
+
 </main>
 
 <footer>
@@ -449,23 +652,52 @@
   const hint = document.getElementById("module-hint");
 
   function showModule(id) {
-    buttons.forEach(b => b.classList.toggle("active", b.dataset.target === id));
+    buttons.forEach(b => {
+      const isActive = (b.dataset.target === id);
+      b.classList.toggle("active", isActive);
+      b.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
+
     sections.forEach(s => s.classList.toggle("active", s.id === id));
-    if (hint) hint.style.display = "none";
+
+    if (hint) hint.textContent = "";
+
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      MathJax.typesetPromise();
+    }
   }
 
   buttons.forEach(btn => btn.addEventListener("click", () => showModule(btn.dataset.target)));
 
-  // Gestion de l'accordéon (un seul ouvert à la fois)
-  document.querySelectorAll("details.submodule").forEach(d => {
-    d.addEventListener("toggle", () => {
-      if (d.open) {
-        document.querySelectorAll("details.submodule").forEach(other => {
-          if (other !== d) other.open = false;
-        });
-      }
+  // Accordion "strict" à l'intérieur d'Algèbre (un seul ouvert à la fois)
+  function setupSubmoduleAccordion() {
+    const submodules = document.querySelectorAll("#alg details.submodule");
+    submodules.forEach(d => {
+      d.addEventListener("toggle", () => {
+        if (d.open) submodules.forEach(other => { if (other !== d) other.open = false; });
+      });
     });
-  });
+
+    // Fermer si clic à l'extérieur (pratique quand le panneau est en overlay)
+    document.addEventListener("click", (e) => {
+      const openOne = document.querySelector("#alg details.submodule[open]");
+      if (!openOne) return;
+      if (!openOne.contains(e.target)) openOne.open = false;
+    });
+
+    // Fermer avec Escape
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      const openOne = document.querySelector("#alg details.submodule[open]");
+      if (openOne) openOne.open = false;
+    });
+  }
+
+  setupSubmoduleAccordion();
+
+  // Rien n'apparaît au départ (comme tu le souhaites).
+  // Si tu veux Algèbre par défaut, décommente :
+  // showModule("alg");
 </script>
 
 </body>
